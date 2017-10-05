@@ -9,7 +9,6 @@ networks:
         - subnet: 10.28.0.0/16
 
 services:
-
     etcd1:
         image: quay.io/coreos/etcd
         ports:
