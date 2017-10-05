@@ -1,0 +1,70 @@
+version: '3.3'
+
+networks:
+  etcd:
+    driver: overlay
+    ipam:
+      driver: default
+      config:
+        - subnet: 10.28.0.0/16
+
+services:
+
+    etcd1:
+        image: quay.io/coreos/etcd
+        ports:
+            - target: 2379
+              published: 2379
+              protocol: tcp
+              mode: host
+        environment:
+            ETCD_NAME: infra1
+            ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd1:2380
+            ETCD_INITIAL_CLUSTER: infra3=http://etcd3:2380,infra1=http://etcd1:2380,infra2=http://etcd2:2380
+            ETCD_INITIAL_CLUSTER_TOKEN: etcd-tasting-01
+            ETCD_ADVERTISE_CLIENT_URLS: http://etcd1:2379
+            ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+            ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+        networks:
+            - "etcd"
+
+    etcd2:
+        image: quay.io/coreos/etcd
+        ports:
+            - target: 2379
+              published: 2389
+              protocol: tcp
+              mode: host
+        environment:
+            ETCD_NAME: infra2
+            ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd2:2380
+            ETCD_INITIAL_CLUSTER: infra3=http://etcd3:2380,infra1=http://etcd1:2380,infra2=http://etcd2:2380
+            ETCD_INITIAL_CLUSTER_TOKEN: etcd-tasting-01
+            ETCD_ADVERTISE_CLIENT_URLS: http://etcd2:2379
+            ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+            ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+        networks:
+            - "etcd"
+        depends_on:
+          - etcd1
+
+    etcd3:
+        image: quay.io/coreos/etcd
+        ports:
+            - target: 2379
+              published: 2399
+              protocol: tcp
+              mode: host
+        environment:
+            ETCD_NAME: infra3
+            ETCD_INITIAL_ADVERTISE_PEER_URLS: http://etcd3:2380
+            ETCD_INITIAL_CLUSTER: infra3=http://etcd3:2380,infra1=http://etcd1:2380,infra2=http://etcd2:2380
+            ETCD_INITIAL_CLUSTER_TOKEN: etcd-tasting-01
+            ETCD_ADVERTISE_CLIENT_URLS: http://etcd3:2379
+            ETCD_LISTEN_PEER_URLS: http://0.0.0.0:2380
+            ETCD_LISTEN_CLIENT_URLS: http://0.0.0.0:2379
+        networks:
+            - "etcd"
+        depends_on:
+          - etcd2
+
